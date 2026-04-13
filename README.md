@@ -1,4 +1,5 @@
 <p align="center">
+  <img src="https://img.shields.io/badge/status-alpha-orange?style=for-the-badge" alt="Alpha" />
   <img src="https://img.shields.io/badge/Next.js-16-black?style=for-the-badge&logo=next.js" alt="Next.js" />
   <img src="https://img.shields.io/badge/TypeScript-5-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
   <img src="https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white" alt="Tailwind CSS" />
@@ -15,6 +16,9 @@
   Fluê é um app de prática de idiomas que usa inteligência artificial para simular conversas naturais e analisar sua escrita e fala em tempo real. Converse por texto ou áudio e receba correções detalhadas a cada mensagem.
 </p>
 
+> [!WARNING]
+> **Este projeto está em desenvolvimento ativo (alpha).** Diversas funcionalidades ainda estão incompletas ou instáveis — incluindo a versão desktop, o sistema de progresso e o plano Pro. Espere mudanças frequentes e breaking changes.
+
 ---
 
 ## Visão Geral
@@ -28,10 +32,7 @@ Fluê combina conversação com IA e análise linguística para criar uma experi
 
 ### Idiomas suportados
 
-| | Idioma | |
-|---|---|---|
-| 🇧🇷 | Português | 🇺🇸 | English |
-| 🇪🇸 | Español | 🇫🇷 | Français |
+🇧🇷 Português &nbsp;&middot;&nbsp; 🇺🇸 English &nbsp;&middot;&nbsp; 🇪🇸 Español &nbsp;&middot;&nbsp; 🇫🇷 Français
 
 ## Funcionalidades
 
@@ -157,6 +158,23 @@ Acesse [http://localhost:3000](http://localhost:3000).
 |---|---|---|
 | Mensagens/dia | 15 | 150 |
 | Análise por mensagem | Haiku 4.5 | Sonnet 4.5 |
+
+## Roadmap
+
+O projeto está em fase **alpha**. Abaixo o que já funciona e o que ainda está por vir:
+
+- [x] Chat com IA (texto)
+- [x] Análise de mensagens em tempo real
+- [x] Mensagens de voz com transcrição (Whisper)
+- [x] Autenticação (login, signup, recuperação de senha)
+- [x] Rate limiting por tier (Free / Pro)
+- [x] Dashboard de progresso (parcial)
+- [ ] Layout desktop responsivo
+- [ ] Sistema de pagamento (plano Pro)
+- [ ] Notificações e lembretes
+- [ ] Versão mobile nativa (React Native)
+- [ ] Mais idiomas
+- [ ] Exercícios e desafios estruturados
 
 ---
 
