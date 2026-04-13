@@ -4,7 +4,7 @@ import { Check, ChevronLeft, Eye, EyeOff, Mail, User } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { useMockAuth } from "@/hooks/use-mock-auth";
+import { useAuth } from "@/hooks/use-auth";
 
 export default function SignUpPage() {
   const [name, setName] = useState("");
@@ -14,24 +14,30 @@ export default function SignUpPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [agreedTerms, setAgreedTerms] = useState(false);
-  const { signup } = useMockAuth();
+  const { signup } = useAuth();
   const router = useRouter();
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (password !== confirmPassword) return;
-    if (!agreedTerms) return;
-    if (signup(name, email, password)) {
-      router.push("/chats");
+    if (password !== confirmPassword) {
+      setError("Passwords don't match");
+      return;
     }
+    if (!agreedTerms) return;
+    setError("");
+    setLoading(true);
+    const success = await signup(name, email, password);
+    if (!success) {
+      setError("Could not create account. Try a different email.");
+    }
+    setLoading(false);
   };
 
   return (
     <div className="flex min-h-dvh flex-col">
-      {/* Status bar spacer */}
-      <div className="h-[62px]" />
-
-      <div className="flex flex-1 flex-col gap-5 px-6 pb-8 pt-4">
+      <div className="flex flex-1 flex-col gap-5 px-6 pb-8 pt-6">
         {/* Top row */}
         <div className="flex items-center justify-between">
           <button
@@ -157,11 +163,14 @@ export default function SignUpPage() {
             </span>
           </div>
 
+          {error && <p className="text-center text-sm text-error">{error}</p>}
+
           <button
             type="submit"
-            className="flex h-14 items-center justify-center rounded-3xl bg-primary font-body text-base font-semibold text-white shadow-[0_6px_16px_#8B5CF650]"
+            disabled={loading}
+            className="flex h-14 items-center justify-center rounded-3xl bg-primary font-body text-base font-semibold text-white shadow-[0_6px_16px_#8B5CF650] disabled:opacity-60"
           >
-            Create Account
+            {loading ? "Creating..." : "Create Account"}
           </button>
         </form>
 

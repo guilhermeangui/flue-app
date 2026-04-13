@@ -2,30 +2,31 @@
 
 import { Apple, Eye, EyeOff, Mail } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { useMockAuth } from "@/hooks/use-mock-auth";
+import { useAuth } from "@/hooks/use-auth";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const { login } = useMockAuth();
-  const router = useRouter();
+  const { login, loginWithGoogle, loginWithApple } = useAuth();
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (login(email, password)) {
-      router.push("/chats");
+    setError("");
+    setLoading(true);
+    const success = await login(email, password);
+    if (!success) {
+      setError("Invalid email or password");
     }
+    setLoading(false);
   };
 
   return (
     <div className="flex min-h-dvh flex-col">
-      {/* Status bar spacer */}
-      <div className="h-[62px]" />
-
-      <div className="flex flex-1 flex-col gap-[18px] px-6 pb-6 pt-5">
+      <div className="flex flex-1 flex-col gap-[18px] px-6 pb-6 pt-8">
         {/* Logo */}
         <div className="flex flex-col items-center gap-3.5">
           <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-br from-primary-light to-primary-dark">
@@ -103,11 +104,14 @@ export default function LoginPage() {
             </Link>
           </div>
 
+          {error && <p className="text-center text-sm text-error">{error}</p>}
+
           <button
             type="submit"
-            className="flex h-14 items-center justify-center rounded-3xl bg-primary font-body text-base font-semibold text-white shadow-[0_6px_16px_#8B5CF650]"
+            disabled={loading}
+            className="flex h-14 items-center justify-center rounded-3xl bg-primary font-body text-base font-semibold text-white shadow-[0_6px_16px_#8B5CF650] disabled:opacity-60"
           >
-            Sign In
+            {loading ? "Signing in..." : "Sign In"}
           </button>
         </form>
 
@@ -121,6 +125,7 @@ export default function LoginPage() {
         {/* Social buttons */}
         <button
           type="button"
+          onClick={loginWithGoogle}
           className="flex h-[52px] items-center justify-center gap-2.5 rounded-3xl bg-surface text-[15px] font-medium text-text-primary"
         >
           <span className="font-heading text-lg font-extrabold text-[#4285F4]">
@@ -131,6 +136,7 @@ export default function LoginPage() {
 
         <button
           type="button"
+          onClick={loginWithApple}
           className="flex h-[52px] items-center justify-center gap-2.5 rounded-3xl bg-text-primary text-[15px] font-medium text-white"
         >
           <Apple className="h-5 w-5" />

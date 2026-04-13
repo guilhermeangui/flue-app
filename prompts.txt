@@ -30,3 +30,11 @@ The whole app language can be changed between english and portuguese (brazil) - 
 "
 
 Baseado nessas informações, peço para que você crie um plano de ação com o que ficou entendido nas regras informadas e também no layout do MCP do Pencil (considere que nem todas as páginas estão ali: utilize sua lógica para identificar "gaps" e comente aqui suas descobertas).
+
+
+-----
+
+senha db supabase: jahsup-xibwoq-wicNu2
+
+NEXT_PUBLIC_SUPABASE_URL=https://recreyrzogjrupcwzfio.supabase.co
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY=sb_publishable_vFg5NdfnpoTIfHH0y1P71Q_3s1o6VIJ

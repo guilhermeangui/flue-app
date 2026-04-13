@@ -1,25 +1,31 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { TabBar } from "@/components/layout/tab-bar";
-import { useMockAuth } from "@/hooks/use-mock-auth";
+import { useAuth } from "@/hooks/use-auth";
+
+const TAB_BAR_ROUTES = ["/chats", "/progress", "/profile"];
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated } = useMockAuth();
-  const router = useRouter();
+  const { isAuthenticated, isLoading } = useAuth();
+  const pathname = usePathname();
 
-  useEffect(() => {
-    if (!isAuthenticated) {
-      router.replace("/login");
-    }
-  }, [isAuthenticated, router]);
-
+  if (isLoading) return null;
   if (!isAuthenticated) return null;
 
+  const showTabBar = TAB_BAR_ROUTES.includes(pathname);
+
+  if (!showTabBar) {
+    return (
+      <div className="mx-auto flex h-dvh w-full max-w-3xl flex-col">
+        {children}
+      </div>
+    );
+  }
+
   return (
-    <div className="mx-auto flex min-h-dvh max-w-[402px] flex-col bg-white">
-      <div className="flex-1 overflow-y-auto">{children}</div>
+    <div className="mx-auto flex h-dvh w-full max-w-3xl flex-col">
+      <main className="flex flex-1 flex-col overflow-y-auto">{children}</main>
       <TabBar />
     </div>
   );

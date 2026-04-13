@@ -1,6 +1,50 @@
 @import "tailwindcss";
 
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes message-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+@keyframes message-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+@keyframes recording-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgb(239 68 68 / 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 12px rgb(239 68 68 / 0);
+  }
+}
+
 @theme {
+  --animate-fade-in: fade-in 0.3s ease-out;
+  --animate-recording-pulse: recording-pulse 1.5s ease-in-out infinite;
+
   --font-heading: "Plus Jakarta Sans", sans-serif;
   --font-body: "Inter", sans-serif;
 
@@ -15,4 +59,52 @@
   --color-success: #22c55e;
   --color-warning: #f59e0b;
   --color-error: #ef4444;
+}
+
+@keyframes spinner {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes overlay-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.transition-overlay {
+  animation: overlay-in 0.2s ease-out forwards;
+}
+
+.transition-spinner {
+  animation: spinner 1s linear infinite;
+}
+
+.msg-in-right {
+  animation: message-in-right 0.25s ease-out;
+}
+
+.msg-in-left {
+  animation: message-in-left 0.25s ease-out;
+}
+
+@keyframes typing-bounce {
+  0%,
+  60%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.4;
+  }
+  30% {
+    transform: translateY(-4px);
+    opacity: 1;
+  }
+}
+
+.typing-dot {
+  animation: typing-bounce 1.2s ease-in-out infinite;
 }

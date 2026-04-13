@@ -1,6 +1,6 @@
 # Fluê
 
-Aplicativo web construído com Next.js. Futuramente poderá ter versões iOS/Android (considerar ao escolher libs — preferir soluções cross-platform e isolar lógica de negócio da camada de UI).
+App de prática de idiomas com IA. Web app (Next.js), com futuras versões iOS/Android (preferir libs cross-platform, isolar lógica de negócio da UI).
 
 ## Stack
 
@@ -10,16 +10,44 @@ Aplicativo web construído com Next.js. Futuramente poderá ter versões iOS/And
 - **Linting/Formatting:** Biome v2.2
 - **Package Manager:** pnpm
 - **Runtime:** Node.js
+- **Auth + DB + Storage:** Supabase (Auth, PostgreSQL, Storage)
+- **AI (conversação):** Anthropic Claude API (`@anthropic-ai/sdk`) — Haiku 4.5 para conversação, Sonnet 4.5 para análise Pro
+- **AI (transcrição de áudio):** OpenAI Whisper (`openai` SDK)
 
 ## Estrutura
 
 ```
 src/
-  app/           # App Router — páginas, layouts, rotas
-    globals.css  # CSS global com import do Tailwind
-    layout.tsx   # Root layout (lang=pt-BR)
-    page.tsx     # Página inicial
-public/          # Assets estáticos
+  app/                     # App Router — páginas, layouts, rotas
+    (auth)/                # Login, signup, forgot-password
+    (app)/                 # App principal (chats, progress, profile)
+    globals.css            # CSS global + Tailwind + animações
+  components/              # Componentes React reutilizáveis
+    chat/                  # ChatView, ChatInput, MessageBubble, VoiceMessage, AnalysisCard
+    layout/                # Header, DeviceFrame
+    profile/               # ProfileView
+    settings/              # SettingsView
+    skeletons/             # Loading skeletons
+  lib/
+    ai/                    # Serviço de IA
+      service.ts           # generateResponse, generateVoiceAnalysis, transcribeAudio, logUsage
+      prompts.ts           # System prompts por idioma (conversation + analysis)
+      context.ts           # buildContext — monta histórico com windowing
+      rate-limiter.ts      # checkAndIncrementUsage, getUsageStatus
+    db/
+      actions/             # Server Actions (chat-actions, auth-actions, profile-actions)
+      queries.ts           # Queries read-only (getChats, getMessages, etc.)
+      mappers.ts           # Row → Domain object mappers
+      schemas.ts           # Zod validation schemas
+      types.ts             # DB row types
+    supabase/              # Supabase client (server + client)
+    constants.ts           # LANGUAGES, TIER_LIMITS
+    types.ts               # Domain types (User, Chat, Message, AnalysisData)
+    format.ts              # Formatação de datas
+  hooks/                   # use-auth
+  middleware.ts            # Auth route protection
+supabase/
+  migrations/              # SQL migrations (001-004)
 ```
 
 ## Comandos
@@ -30,6 +58,15 @@ pnpm build      # Build de produção
 pnpm start      # Servidor de produção
 pnpm lint       # Biome check (lint + format check)
 pnpm format     # Biome format com auto-fix
+```
+
+## Env vars necessárias
+
+```
+NEXT_PUBLIC_SUPABASE_URL=...
+NEXT_PUBLIC_SUPABASE_ANON_KEY=...
+ANTHROPIC_API_KEY=...
+OPENAI_API_KEY=...          # Para Whisper (transcrição de áudio)
 ```
 
 ## Convenções

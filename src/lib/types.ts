@@ -10,6 +10,12 @@ export interface User {
   dayStreak: number;
   totalSessions: number;
   avgScore: number;
+  notificationsEnabled: boolean;
+  audioQuality: string;
+  appLanguage: string;
+  tier: "free" | "pro";
+  dailyMessagesUsed: number;
+  dailyMessageLimit: number;
   createdAt: string;
 }
 
@@ -20,9 +26,10 @@ export interface Chat {
   title: string;
   lastMessage: string;
   score: number;
-  duration: string;
-  date: string;
+  durationSeconds: number;
   messagesCount: number;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface WordReview {
@@ -51,9 +58,10 @@ export interface Message {
   sender: "user" | "ai";
   type: "text" | "voice" | "analysis";
   content?: string;
-  voiceDuration?: string;
+  voiceUrl?: string;
+  voiceDurationSeconds?: number;
   analysis?: AnalysisData;
-  timestamp: string;
+  createdAt: string;
 }
 
 export interface ProgressData {
@@ -73,11 +81,4 @@ export interface LanguageConfig {
   name: string;
   flag: string;
   nativeName: string;
-}
-
-export interface AIProvider {
-  id: string;
-  name: string;
-  description: string;
-  connected: boolean;
 }

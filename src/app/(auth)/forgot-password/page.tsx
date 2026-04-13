@@ -17,10 +17,7 @@ export default function ForgotPasswordPage() {
 
   return (
     <div className="flex min-h-dvh flex-col">
-      {/* Status bar spacer */}
-      <div className="h-[62px]" />
-
-      <div className="flex flex-1 flex-col gap-5 px-6 pb-8 pt-4">
+      <div className="flex flex-1 flex-col gap-5 px-6 pb-8 pt-6">
         {/* Top row */}
         <div className="flex items-center justify-between">
           <button

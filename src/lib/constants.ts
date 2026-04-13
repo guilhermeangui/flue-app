@@ -1,4 +1,4 @@
-import type { AIProvider, LanguageConfig } from "./types";
+import type { LanguageConfig } from "./types";
 
 export const LANGUAGES: LanguageConfig[] = [
   {
@@ -27,20 +27,10 @@ export const LANGUAGES: LanguageConfig[] = [
   },
 ];
 
-export const AI_PROVIDERS: AIProvider[] = [
-  {
-    id: "claude",
-    name: "Claude",
-    description: "Anthropic's AI assistant",
-    connected: false,
-  },
-  {
-    id: "openai",
-    name: "OpenAI",
-    description: "GPT-powered language models",
-    connected: false,
-  },
-];
+export const TIER_LIMITS = {
+  free: 15,
+  pro: 150,
+} as const;
 
 export const APP_LANGUAGES = [
   { code: "en", name: "English" },

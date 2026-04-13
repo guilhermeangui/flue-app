@@ -1,10 +1,10 @@
-"use client";
-
-import { MessageCircle, Plus, Search } from "lucide-react";
+import { MessageCircle, Plus } from "lucide-react";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { Header } from "@/components/layout/header";
-import { useMockChat } from "@/hooks/use-mock-chat";
 import { LANGUAGES } from "@/lib/constants";
+import { getChats, getCurrentUser } from "@/lib/db/queries";
+import { formatDuration, formatRelativeDate } from "@/lib/format";
 
 function ScoreBadge({ score }: { score: number }) {
   const color =
@@ -21,12 +21,15 @@ function ScoreBadge({ score }: { score: number }) {
   );
 }
 
-export default function ChatsPage() {
-  const { chats } = useMockChat();
+export default async function ChatsPage() {
+  const user = await getCurrentUser();
+  if (!user) redirect("/login");
+
+  const chats = await getChats(user.id);
 
   return (
-    <div className="relative flex flex-1 flex-col">
-      <Header title="Chats" rightIcon={Search} />
+    <div className="flex flex-1 flex-col">
+      <Header title="Chats" rightIcon="search" />
 
       {chats.length === 0 ? (
         <div className="flex flex-1 flex-col items-center justify-center gap-4 px-6">
@@ -50,13 +53,13 @@ export default function ChatsPage() {
                   href={`/chats/${chat.id}`}
                   className="flex items-center gap-3.5 py-3.5"
                 >
-                  <div className="flex flex-1 flex-col gap-0.5">
-                    <div className="flex items-center justify-between">
-                      <span className="font-heading text-[15px] font-bold text-text-primary">
+                  <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="truncate font-heading text-[15px] font-bold text-text-primary">
                         {chat.title}
                       </span>
-                      <span className="text-xs text-text-muted">
-                        {chat.date}
+                      <span className="shrink-0 text-xs text-text-muted">
+                        {formatRelativeDate(chat.updatedAt)}
                       </span>
                     </div>
                     <p className="truncate text-sm text-text-secondary">
@@ -68,7 +71,7 @@ export default function ChatsPage() {
                       </span>
                       <span className="text-xs text-text-muted">·</span>
                       <span className="text-xs text-text-muted">
-                        {chat.duration}
+                        {formatDuration(chat.durationSeconds)}
                       </span>
                       <ScoreBadge score={chat.score} />
                     </div>
@@ -81,13 +84,15 @@ export default function ChatsPage() {
         </div>
       )}
 
-      {/* FAB */}
-      <Link
-        href="/chats/new"
-        className="absolute bottom-4 right-5 flex h-[60px] w-[60px] items-center justify-center rounded-full bg-primary shadow-[0_4px_16px_#8B5CF640]"
-      >
-        <Plus className="h-[26px] w-[26px] text-white" />
-      </Link>
+      {/* FAB — sticky at bottom, above TabBar */}
+      <div className="flex justify-end px-5 pb-4 pt-2">
+        <Link
+          href="/chats/new"
+          className="flex h-[60px] w-[60px] items-center justify-center rounded-full bg-primary shadow-[0_4px_16px_#8B5CF640]"
+        >
+          <Plus className="h-[26px] w-[26px] text-white" />
+        </Link>
+      </div>
     </div>
   );
 }

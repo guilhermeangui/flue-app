@@ -1,26 +1,33 @@
 "use client";
 
-import type { LucideIcon } from "lucide-react";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, Search, Settings } from "lucide-react";
 import { useRouter } from "next/navigation";
+
+const ICONS = {
+  search: Search,
+  settings: Settings,
+} as const;
+
+type IconName = keyof typeof ICONS;
 
 interface HeaderProps {
   title: string;
   showBack?: boolean;
-  rightIcon?: LucideIcon;
+  rightIcon?: IconName;
   onRightClick?: () => void;
 }
 
 export function Header({
   title,
   showBack,
-  rightIcon: RightIcon,
+  rightIcon,
   onRightClick,
 }: HeaderProps) {
   const router = useRouter();
+  const RightIcon = rightIcon ? ICONS[rightIcon] : null;
 
   return (
-    <div className="flex items-center justify-between px-5 pb-2 pt-0">
+    <div className="flex items-center justify-between px-5 pb-2 pt-5">
       {showBack ? (
         <button type="button" onClick={() => router.back()} className="p-1">
           <ChevronLeft className="h-7 w-7 text-text-primary" />

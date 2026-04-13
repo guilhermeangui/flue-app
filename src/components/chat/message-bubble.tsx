@@ -2,10 +2,16 @@
 
 import type { Message } from "@/lib/types";
 
-export function MessageBubble({ message }: { message: Message }) {
+export function MessageBubble({
+  message,
+  animate = false,
+}: {
+  message: Message;
+  animate?: boolean;
+}) {
   if (message.sender === "user") {
     return (
-      <div className="flex justify-end">
+      <div className={`flex justify-end ${animate ? "msg-in-right" : ""}`}>
         <div className="rounded-[20px] rounded-br-[4px] bg-primary px-3.5 py-3 text-sm text-white">
           {message.content}
         </div>
@@ -14,7 +20,7 @@ export function MessageBubble({ message }: { message: Message }) {
   }
 
   return (
-    <div className="flex items-end gap-2">
+    <div className={`flex items-end gap-2 ${animate ? "msg-in-left" : ""}`}>
       <div className="flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-[15px] bg-primary">
         <span className="text-[11px] font-bold text-white">AI</span>
       </div>
