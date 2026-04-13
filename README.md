@@ -1,36 +1,165 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+<p align="center">
+  <img src="https://img.shields.io/badge/Next.js-16-black?style=for-the-badge&logo=next.js" alt="Next.js" />
+  <img src="https://img.shields.io/badge/TypeScript-5-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
+  <img src="https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white" alt="Tailwind CSS" />
+  <img src="https://img.shields.io/badge/Supabase-Auth_|_DB_|_Storage-3FCF8E?style=for-the-badge&logo=supabase&logoColor=white" alt="Supabase" />
+</p>
 
-## Getting Started
+<h1 align="center">🗣️ Fluê</h1>
 
-First, run the development server:
+<p align="center">
+  <strong>Pratique idiomas conversando com IA — receba feedback em tempo real sobre gramática, pronúncia e ortografia.</strong>
+</p>
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+<p align="center">
+  Fluê é um app de prática de idiomas que usa inteligência artificial para simular conversas naturais e analisar sua escrita e fala em tempo real. Converse por texto ou áudio e receba correções detalhadas a cada mensagem.
+</p>
+
+---
+
+## Visão Geral
+
+Fluê combina conversação com IA e análise linguística para criar uma experiência de aprendizado imersiva:
+
+- **Converse naturalmente** — O AI Coach mantém diálogos contextuais no idioma que você está praticando
+- **Receba análise instantânea** — Cada mensagem é avaliada com score de precisão, erros destacados e correções explicadas
+- **Pratique com voz** — Grave áudios que são transcritos automaticamente e analisados como texto
+- **Acompanhe sua evolução** — Streaks diários, tendência de precisão e breakdown de erros por categoria
+
+### Idiomas suportados
+
+| | Idioma | |
+|---|---|---|
+| 🇧🇷 | Português | 🇺🇸 | English |
+| 🇪🇸 | Español | 🇫🇷 | Français |
+
+## Funcionalidades
+
+### 💬 Chat com IA
+Conversas naturais e fluidas com um coach de idiomas baseado em IA. O coach se adapta ao contexto da conversa, faz perguntas, sugere tópicos e mantém o diálogo interessante — tudo no idioma-alvo.
+
+### 📊 Análise em Tempo Real
+Cada mensagem que você envia é analisada automaticamente:
+- **Score de precisão** (0-100%)
+- **Palavras para revisar** classificadas por tipo (gramática, ortografia, pronúncia)
+- **Correções detalhadas** com explicação no idioma nativo
+
+### 🎙️ Mensagens de Voz
+Grave áudios diretamente no chat. O áudio é transcrito via OpenAI Whisper e analisado pelo AI Coach, permitindo praticar pronúncia e receber feedback escrito.
+
+### 📈 Progresso
+- Streak semanal com visualização dia-a-dia
+- Gráfico de tendência de precisão
+- Breakdown de erros: pronúncia vs gramática vs ortografia
+
+### 👤 Perfil e Configurações
+- Gerenciamento de idiomas-alvo
+- Configurações de qualidade de áudio
+- Idioma da interface (pt-BR / English)
+
+## Arquitetura
+
+```
+src/
+├── app/                        # Next.js App Router
+│   ├── (auth)/                 # Login, signup, recuperação de senha
+│   └── (app)/                  # App principal
+│       ├── chats/              # Lista de chats e tela de conversa
+│       ├── progress/           # Dashboard de progresso
+│       └── profile/            # Perfil e configurações
+├── components/                 # Componentes React reutilizáveis
+│   ├── chat/                   # ChatView, MessageBubble, AnalysisCard, VoiceMessage
+│   ├── layout/                 # Header, TabBar, DeviceFrame
+│   ├── ui/                     # Button, Input, Badge, Avatar, etc.
+│   └── skeletons/              # Loading states
+├── lib/
+│   ├── ai/                     # Integração com IA
+│   │   ├── service.ts          # Geração de respostas, análise, transcrição
+│   │   ├── prompts.ts          # System prompts por idioma
+│   │   ├── context.ts          # Windowing de histórico de conversa
+│   │   └── rate-limiter.ts     # Controle de uso diário
+│   ├── db/
+│   │   ├── actions/            # Server Actions (chat, auth, profile)
+│   │   ├── queries.ts          # Queries read-only
+│   │   └── schemas.ts          # Validação com Zod
+│   └── supabase/               # Clients Supabase (server/client)
+└── middleware.ts                # Proteção de rotas autenticadas
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Stack Técnica
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+| Camada | Tecnologia |
+|---|---|
+| **Framework** | Next.js 16 (App Router + Turbopack) |
+| **Linguagem** | TypeScript |
+| **Estilização** | Tailwind CSS v4 |
+| **Auth / DB / Storage** | Supabase |
+| **IA (Conversação)** | Claude API (Haiku 4.5 para chat, Sonnet 4.5 para análise Pro) |
+| **IA (Transcrição)** | OpenAI Whisper |
+| **Validação** | Zod |
+| **Forms** | React Hook Form |
+| **Lint / Format** | Biome |
+| **Package Manager** | pnpm |
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Como Rodar
 
-## Learn More
+### Pré-requisitos
 
-To learn more about Next.js, take a look at the following resources:
+- Node.js 18+
+- pnpm
+- Conta no [Supabase](https://supabase.com) (Auth + PostgreSQL)
+- API key da [Anthropic](https://console.anthropic.com)
+- API key da [OpenAI](https://platform.openai.com) (para Whisper)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Setup
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+# Clone o repositório
+git clone https://github.com/guilhermeangui/flue-app.git
+cd flue-app
 
-## Deploy on Vercel
+# Instale as dependências
+pnpm install
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+# Configure as variáveis de ambiente
+cp .env.example .env.local
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Preencha o `.env.local`:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=...
+NEXT_PUBLIC_SUPABASE_ANON_KEY=...
+ANTHROPIC_API_KEY=...
+OPENAI_API_KEY=...
+```
+
+```bash
+# Rode o servidor de desenvolvimento
+pnpm dev
+```
+
+Acesse [http://localhost:3000](http://localhost:3000).
+
+### Scripts
+
+| Comando | Descrição |
+|---|---|
+| `pnpm dev` | Servidor de desenvolvimento (Turbopack) |
+| `pnpm build` | Build de produção |
+| `pnpm start` | Servidor de produção |
+| `pnpm lint` | Lint + format check (Biome) |
+| `pnpm format` | Auto-fix de formatação |
+
+## Planos de Uso
+
+| | Free | Pro |
+|---|---|---|
+| Mensagens/dia | 15 | 150 |
+| Análise por mensagem | Haiku 4.5 | Sonnet 4.5 |
+
+---
+
+<p align="center">
+  Feito com ☕ e IA por <a href="https://github.com/guilhermeangui">@guilhermeangui</a>
+</p>
