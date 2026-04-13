@@ -1,0 +1,40 @@
+Vamos começar criando um projeto Next.js em branco nessa pasta, usando o diretório "src" para o nosso código. Vamos usar Biome para a linting/formatting. Vamos usar Tailwind para estilização. Crie um app totalmente em branco, sem conteúdo na página, deixe tudo em branco. Use a versão 16.1.6 do NextJS; Formatação em 2 espaços, integre o Biome com o Tailwind para entender as diretivas do postcss, o resto manter um padrão; O package manager deve ser o pnpm.
+
+A pasta do projeto é flue-app mas o nome do aplicativo será "Fluê"
+
+Algo a ser considerado: Eventualmente, não agora mas num futuro a médio prazo, este projeto poderá ter uma versão para iOS e Android. Leve isso em consideração conforme for desenvolver a stack. 
+
+Após tudo ficar definido, documente a estrutura em algum arquivo - sempre colaborando com a próxima sessão que terei com outro Claude Code. Importante: O Claude NUNCA deve se adicionar como co-autor/contributor. Sempre deverá ser em meu nome (guilhermeangui). Não quero ver o Claude como contribuidor no repositório e nem nos commits.
+
+----
+
+O repositório remoto é esse aqui: git@github.com:guilhermeangui/flue-app.git. Adicione-o e dê o push dos commits
+
+----
+
+Lembre-se: NUNCA commite algo enquanto eu não pedir. 
+
+Agora, utilize o MCP do Pencil para você estudar o projeto.
+
+Dando um contexto, este foi o prompt que usei para criar o projeto no Pencil:
+"
+Create an app where you can send, in a chat, voice or text messages (emphasis on voice) to an AI, and it returns an analysis with the transcription of what was said, indicating words with incorrect pronunciation/spelling, grammar and syntax errors, etc. This is a learning a new language app. So, it should be very friendly - if you are a non-native English speaker and you want to keep learning English, the app should indicate all those errors I mentioned before but should also be friendly - like a friendly tutor.
+
+But remember: It fundamentally must look like a conversation chat: you send the voice/text message first and then the IA chatbot returns the analysis inside the chat, so the user can keep practicing without interruptions. Its almost as if the user is having a conversation with a teacher via iMessage/WhatsApp. Just remember: The IA chatbot must always return the analysis of what the user said - use text highlighting and all the good practices to make it beautiful and user friendly
+
+It also should have a login page, a create account page and, in the logged in area, the user can access its own settings page. The settings page should have some configurations and, one of them, should be a place where the user can connect its own IA APIs (like Claude, OpenAI, etc). 
+
+The user can set his native language somewhere and can decide which language it is going to be learned.
+
+The whole app language can be changed between english and portuguese (brazil) - but please note: in this case i'm not talking about the chats between the user and the IA chats but the whole app - login pages, dashboards, etc.
+"
+
+Baseado nessas informações, peço para que você crie um plano de ação com o que ficou entendido nas regras informadas e também no layout do MCP do Pencil (considere que nem todas as páginas estão ali: utilize sua lógica para identificar "gaps" e comente aqui suas descobertas).
+
+
+-----
+
+senha db supabase: jahsup-xibwoq-wicNu2
+
+NEXT_PUBLIC_SUPABASE_URL=https://recreyrzogjrupcwzfio.supabase.co
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY=sb_publishable_vFg5NdfnpoTIfHH0y1P71Q_3s1o6VIJ
