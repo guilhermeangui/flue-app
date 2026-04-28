@@ -50,6 +50,8 @@ export interface AnalysisData {
   accuracyScore: number;
   issuesCount: number;
   details: CorrectionDetail[];
+  languageMismatch?: boolean;
+  detectedLanguage?: string;
 }
 
 export interface Message {
@@ -58,7 +60,7 @@ export interface Message {
   sender: "user" | "ai";
   type: "text" | "voice" | "analysis";
   content?: string;
-  voiceUrl?: string;
+  voiceLocalId?: string;
   voiceDurationSeconds?: number;
   analysis?: AnalysisData;
   createdAt: string;

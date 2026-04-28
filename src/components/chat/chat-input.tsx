@@ -1,41 +1,44 @@
 "use client";
 
 import { Mic, Paperclip, Send, Square } from "lucide-react";
-import { useCallback, useRef, useState } from "react";
-
-const AUDIO_SPEED_FACTOR = 1.3;
+import { useCallback, useEffect, useRef, useState } from "react";
+import { MAX_VOICE_SECONDS } from "@/lib/constants";
 
 /**
- * Accelerate an audio blob by AUDIO_SPEED_FACTOR using Web Audio API.
- * This reduces audio duration (and therefore API cost) when sent for transcription.
+ * Produce an AI-optimized version of a recorded blob.
+ *
+ * Downmixes to mono and resamples to 16 kHz (Whisper's native rate), then
+ * encodes as 16-bit PCM WAV. Unlike the previous pipeline, there is NO
+ * time-stretching — acceleration was the main cause of pronunciation loss.
+ * The resulting file is compact enough (~32 KB/s) to send over a Server
+ * Action while still preserving phoneme fidelity for transcription.
  */
-async function accelerateAudio(blob: Blob): Promise<Blob> {
+async function compressForAi(blob: Blob): Promise<Blob> {
   try {
     const audioCtx = new AudioContext();
     const arrayBuffer = await blob.arrayBuffer();
     const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
 
-    const duration = audioBuffer.duration / AUDIO_SPEED_FACTOR;
+    const TARGET_SAMPLE_RATE = 16000;
+    const duration = audioBuffer.duration;
     const offlineCtx = new OfflineAudioContext(
-      audioBuffer.numberOfChannels,
-      Math.ceil(audioBuffer.sampleRate * duration),
-      audioBuffer.sampleRate,
+      1, // mono
+      Math.ceil(TARGET_SAMPLE_RATE * duration),
+      TARGET_SAMPLE_RATE,
     );
 
     const source = offlineCtx.createBufferSource();
     source.buffer = audioBuffer;
-    source.playbackRate.value = AUDIO_SPEED_FACTOR;
     source.connect(offlineCtx.destination);
     source.start();
 
     const rendered = await offlineCtx.startRendering();
     await audioCtx.close();
 
-    // Encode to WAV (universally supported, no codec dependency)
     const wavBuffer = encodeWav(rendered);
     return new Blob([wavBuffer], { type: "audio/wav" });
   } catch {
-    // Fallback: return original blob if acceleration fails
+    // Fallback: return original blob if processing fails
     return blob;
   }
 }
@@ -45,17 +48,12 @@ function encodeWav(buffer: AudioBuffer): ArrayBuffer {
   const sampleRate = buffer.sampleRate;
   const format = 1; // PCM
   const bitsPerSample = 16;
-
-  const samples =
-    numChannels === 2
-      ? interleave(buffer.getChannelData(0), buffer.getChannelData(1))
-      : buffer.getChannelData(0);
+  const samples = buffer.getChannelData(0);
 
   const dataLength = samples.length * (bitsPerSample / 8);
   const wavBuffer = new ArrayBuffer(44 + dataLength);
   const view = new DataView(wavBuffer);
 
-  // WAV header
   writeString(view, 0, "RIFF");
   view.setUint32(4, 36 + dataLength, true);
   writeString(view, 8, "WAVE");
@@ -70,7 +68,6 @@ function encodeWav(buffer: AudioBuffer): ArrayBuffer {
   writeString(view, 36, "data");
   view.setUint32(40, dataLength, true);
 
-  // PCM samples
   let offset = 44;
   for (let i = 0; i < samples.length; i++) {
     const s = Math.max(-1, Math.min(1, samples[i]));
@@ -87,20 +84,11 @@ function writeString(view: DataView, offset: number, str: string) {
   }
 }
 
-function interleave(left: Float32Array, right: Float32Array): Float32Array {
-  const result = new Float32Array(left.length + right.length);
-  for (let i = 0; i < left.length; i++) {
-    result[i * 2] = left[i];
-    result[i * 2 + 1] = right[i];
-  }
-  return result;
-}
-
 interface ChatInputProps {
   disabled?: boolean;
   placeholder?: string;
   onSend?: (text: string) => void;
-  onSendVoice?: (blob: Blob, durationSeconds: number) => void;
+  onSendVoice?: (rawBlob: Blob, aiBlob: Blob, durationSeconds: number) => void;
   remaining?: number;
   limit?: number;
 }
@@ -119,6 +107,7 @@ export function ChatInput({
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const autoStopRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const startTimeRef = useRef(0);
 
   const hasText = text.trim().length > 0;
@@ -146,8 +135,20 @@ export function ChatInput({
       clearInterval(timerRef.current);
       timerRef.current = null;
     }
+    if (autoStopRef.current) {
+      clearTimeout(autoStopRef.current);
+      autoStopRef.current = null;
+    }
     setIsRecording(false);
     setRecordingTime(0);
+  }, []);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+      if (autoStopRef.current) clearTimeout(autoStopRef.current);
+    };
   }, []);
 
   const startRecording = async () => {
@@ -155,14 +156,14 @@ export function ChatInput({
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       chunksRef.current = [];
 
-      // Use webm/opus for compression — good quality at low bitrate
+      // opus/webm at 64 kbps mono — good quality for voice playback
       const mimeType = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
         ? "audio/webm;codecs=opus"
         : "audio/webm";
 
       const mediaRecorder = new MediaRecorder(stream, {
         mimeType,
-        audioBitsPerSecond: 32000, // 32kbps for compression
+        audioBitsPerSecond: 64000,
       });
 
       mediaRecorder.ondataavailable = (e) => {
@@ -175,16 +176,17 @@ export function ChatInput({
           (Date.now() - startTimeRef.current) / 1000,
         );
         if (chunksRef.current.length > 0 && durationSeconds >= 1) {
-          const originalBlob = new Blob(chunksRef.current, { type: mimeType });
-          // Accelerate audio to reduce transcription cost
-          const acceleratedBlob = await accelerateAudio(originalBlob);
-          onSendVoice?.(acceleratedBlob, durationSeconds);
+          // Raw blob — saved to IndexedDB for playback (preserves full quality)
+          const rawBlob = new Blob(chunksRef.current, { type: mimeType });
+          // Optimized blob — sent to Whisper (mono 16 kHz WAV, no acceleration)
+          const aiBlob = await compressForAi(rawBlob);
+          onSendVoice?.(rawBlob, aiBlob, durationSeconds);
         }
       };
 
       mediaRecorderRef.current = mediaRecorder;
       startTimeRef.current = Date.now();
-      mediaRecorder.start(250); // Collect chunks every 250ms
+      mediaRecorder.start(250);
       setIsRecording(true);
 
       timerRef.current = setInterval(() => {
@@ -192,6 +194,11 @@ export function ChatInput({
           Math.round((Date.now() - startTimeRef.current) / 1000),
         );
       }, 1000);
+
+      // Auto-stop at MAX_VOICE_SECONDS
+      autoStopRef.current = setTimeout(() => {
+        stopRecording();
+      }, MAX_VOICE_SECONDS * 1000);
     } catch {
       // Microphone permission denied or not available
     }
@@ -211,6 +218,10 @@ export function ChatInput({
     return `${m}:${String(s).padStart(2, "0")}`;
   };
 
+  const maxTimeLabel = formatTime(MAX_VOICE_SECONDS);
+  const progressPct = Math.min(100, (recordingTime / MAX_VOICE_SECONDS) * 100);
+  const nearLimit = MAX_VOICE_SECONDS - recordingTime <= 15;
+
   const showUsage = remaining != null && limit != null;
   const usageLow = showUsage && remaining <= 3;
 
@@ -218,11 +229,25 @@ export function ChatInput({
     <div className="flex flex-col gap-1.5 border-t border-surface bg-white px-4 py-4">
       <div className="flex items-center gap-2.5">
         {isRecording ? (
-          <div className="flex flex-1 items-center gap-3 rounded-[22px] bg-red-50 px-4">
-            <div className="h-2.5 w-2.5 animate-pulse rounded-full bg-error" />
-            <span className="h-11 flex-1 content-center text-sm font-medium text-error">
-              Recording... {formatTime(recordingTime)}
-            </span>
+          <div className="flex h-11 flex-1 flex-col justify-center gap-1.5 rounded-[22px] bg-red-50 px-4">
+            <div className="flex items-center gap-2.5">
+              <div className="h-2.5 w-2.5 animate-pulse rounded-full bg-error" />
+              <span
+                className={`flex-1 text-sm font-medium ${
+                  nearLimit ? "text-error" : "text-error/80"
+                }`}
+              >
+                Recording... {formatTime(recordingTime)} / {maxTimeLabel}
+              </span>
+            </div>
+            <div className="h-1 overflow-hidden rounded-full bg-red-100">
+              <div
+                className={`h-full rounded-full transition-all duration-1000 ${
+                  nearLimit ? "bg-error" : "bg-error/60"
+                }`}
+                style={{ width: `${progressPct}%` }}
+              />
+            </div>
           </div>
         ) : (
           <div className="flex flex-1 items-center gap-2 rounded-[22px] bg-surface px-4">

@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronLeft, EllipsisVertical } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AnalysisCard } from "@/components/chat/analysis-card";
@@ -8,6 +8,7 @@ import { ChatInput } from "@/components/chat/chat-input";
 import { MessageBubble } from "@/components/chat/message-bubble";
 import { VoiceMessage } from "@/components/chat/voice-message";
 import type { UsageStatus } from "@/lib/ai/rate-limiter";
+import { saveAudio } from "@/lib/audio-storage";
 import { LANGUAGES } from "@/lib/constants";
 import { sendMessage, sendVoiceMessage } from "@/lib/db/actions/chat-actions";
 import { formatRelativeDate } from "@/lib/format";
@@ -96,15 +97,22 @@ export function ChatView({
   );
 
   const handleSendVoice = useCallback(
-    async (blob: Blob, durationSeconds: number) => {
+    async (rawBlob: Blob, aiBlob: Blob, durationSeconds: number) => {
+      const localAudioId = crypto.randomUUID();
+      // Persist raw audio locally — this is what the user will replay.
+      try {
+        await saveAudio(localAudioId, rawBlob);
+      } catch (err) {
+        console.error("Failed to save audio locally:", err);
+      }
+
       const tempId = `temp-voice-${Date.now()}`;
-      const localUrl = URL.createObjectURL(blob);
       const tempMsg: Message = {
         id: tempId,
         chatId: chat.id,
         sender: "user",
         type: "voice",
-        voiceUrl: localUrl,
+        voiceLocalId: localAudioId,
         voiceDurationSeconds: durationSeconds,
         createdAt: new Date().toISOString(),
       };
@@ -113,10 +121,12 @@ export function ChatView({
       startTyping();
       scrollToBottom();
 
-      // Upload
+      // Send AI-optimized blob (mono 16kHz WAV) for Whisper transcription.
+      // The server persists only the localAudioId reference, not the audio.
       const formData = new FormData();
-      const fileName = blob.type.includes("wav") ? "voice.wav" : "voice.webm";
-      formData.append("audio", blob, fileName);
+      const fileName = aiBlob.type.includes("wav") ? "voice.wav" : "voice.webm";
+      formData.append("audio", aiBlob, fileName);
+      formData.append("localAudioId", localAudioId);
       try {
         await sendVoiceMessage(chat.id, formData, durationSeconds);
       } catch (err) {
@@ -148,9 +158,6 @@ export function ChatView({
             </span>
           </div>
         </div>
-        <button type="button">
-          <EllipsisVertical className="h-[22px] w-[22px] text-text-secondary" />
-        </button>
       </div>
 
       {/* Messages — scrollable area */}
@@ -211,7 +218,7 @@ export function ChatView({
             return (
               <div key={msg.id} className={shouldAnimate ? "msg-in-right" : ""}>
                 <VoiceMessage
-                  voiceUrl={msg.voiceUrl}
+                  voiceLocalId={msg.voiceLocalId}
                   durationSeconds={msg.voiceDurationSeconds ?? 3}
                 />
               </div>

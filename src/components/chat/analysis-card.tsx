@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp, Languages } from "lucide-react";
 import { useState } from "react";
 import type { AnalysisData } from "@/lib/types";
 
@@ -22,8 +22,27 @@ const TYPE_COLORS: Record<string, { bg: string; text: string; dot: string }> = {
   },
 };
 
+const LANG_NAME_PT: Record<string, string> = {
+  pt: "Português",
+  en: "Inglês",
+  es: "Espanhol",
+  fr: "Francês",
+  it: "Italiano",
+  de: "Alemão",
+  ja: "Japonês",
+  zh: "Chinês",
+  ko: "Coreano",
+  ru: "Russo",
+};
+
+function languageLabelPt(code?: string): string {
+  if (!code) return "outro idioma";
+  return LANG_NAME_PT[code] ?? code.toUpperCase();
+}
+
 export function AnalysisCard({ analysis }: { analysis: AnalysisData }) {
   const [showDetails, setShowDetails] = useState(false);
+  const isMismatch = analysis.languageMismatch === true;
 
   return (
     <div className="flex items-end gap-2">
@@ -41,71 +60,91 @@ export function AnalysisCard({ analysis }: { analysis: AnalysisData }) {
           &ldquo;{analysis.transcription}&rdquo;
         </p>
 
-        {/* Words to review */}
-        <span className="text-[11px] font-semibold text-text-secondary">
-          Words to review:
-        </span>
-        <div className="flex flex-wrap gap-1.5">
-          {analysis.wordsToReview.map((w) => {
-            const c = TYPE_COLORS[w.type] ?? TYPE_COLORS.spelling;
-            return (
-              <span
-                key={w.word}
-                className={`rounded-full px-2.5 py-1 text-xs font-semibold ${c.bg} ${c.text}`}
-              >
-                {w.word}
-              </span>
-            );
-          })}
-        </div>
-
-        {/* Divider */}
-        <div className="h-px bg-surface" />
-
-        {/* Summary */}
-        <div className="flex items-center justify-between">
-          <span className="rounded-full bg-teal-500/10 px-2.5 py-1 text-[11px] font-semibold text-teal-500">
-            {analysis.accuracyScore}% accuracy
-          </span>
-          <span className="text-xs text-text-muted">
-            {analysis.issuesCount} issues
-          </span>
-        </div>
-
-        {/* Details toggle */}
-        <button
-          type="button"
-          onClick={() => setShowDetails(!showDetails)}
-          className="flex items-center gap-1"
-        >
-          <span className="text-[13px] font-semibold text-primary">
-            Details
-          </span>
-          {showDetails ? (
-            <ChevronUp className="h-4 w-4 text-primary" />
-          ) : (
-            <ChevronDown className="h-4 w-4 text-primary" />
-          )}
-        </button>
-
-        {/* Details */}
-        {showDetails && (
-          <div className="flex flex-col gap-2">
-            {analysis.details.map((d) => {
-              const c = TYPE_COLORS[d.type] ?? TYPE_COLORS.spelling;
-              return (
-                <div key={d.original} className="flex gap-2">
-                  <div
-                    className={`mt-1.5 h-1.5 w-1.5 shrink-0 rounded-sm ${c.dot}`}
-                  />
-                  <span className="text-xs leading-snug text-[#52525B]">
-                    &ldquo;{d.original}&rdquo; → &ldquo;{d.corrected}&rdquo; —{" "}
-                    {d.explanation}
-                  </span>
-                </div>
-              );
-            })}
+        {isMismatch ? (
+          <div className="flex items-start gap-2 rounded-xl bg-amber-50 px-3 py-2.5">
+            <Languages className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
+            <span className="text-xs leading-snug text-amber-700">
+              Você falou em{" "}
+              <strong>{languageLabelPt(analysis.detectedLanguage)}</strong>.
+              Este chat é para praticar outro idioma — tente novamente no idioma
+              do chat.
+            </span>
           </div>
+        ) : (
+          <>
+            {/* Words to review */}
+            {analysis.wordsToReview.length > 0 && (
+              <>
+                <span className="text-[11px] font-semibold text-text-secondary">
+                  Words to review:
+                </span>
+                <div className="flex flex-wrap gap-1.5">
+                  {analysis.wordsToReview.map((w) => {
+                    const c = TYPE_COLORS[w.type] ?? TYPE_COLORS.spelling;
+                    return (
+                      <span
+                        key={w.word}
+                        className={`rounded-full px-2.5 py-1 text-xs font-semibold ${c.bg} ${c.text}`}
+                      >
+                        {w.word}
+                      </span>
+                    );
+                  })}
+                </div>
+              </>
+            )}
+
+            {/* Divider */}
+            <div className="h-px bg-surface" />
+
+            {/* Summary */}
+            <div className="flex items-center justify-between">
+              <span className="rounded-full bg-teal-500/10 px-2.5 py-1 text-[11px] font-semibold text-teal-500">
+                {analysis.accuracyScore}% accuracy
+              </span>
+              <span className="text-xs text-text-muted">
+                {analysis.issuesCount} issues
+              </span>
+            </div>
+
+            {/* Details toggle */}
+            {analysis.details.length > 0 && (
+              <button
+                type="button"
+                onClick={() => setShowDetails(!showDetails)}
+                className="flex items-center gap-1"
+              >
+                <span className="text-[13px] font-semibold text-primary">
+                  Details
+                </span>
+                {showDetails ? (
+                  <ChevronUp className="h-4 w-4 text-primary" />
+                ) : (
+                  <ChevronDown className="h-4 w-4 text-primary" />
+                )}
+              </button>
+            )}
+
+            {/* Details */}
+            {showDetails && (
+              <div className="flex flex-col gap-2">
+                {analysis.details.map((d) => {
+                  const c = TYPE_COLORS[d.type] ?? TYPE_COLORS.spelling;
+                  return (
+                    <div key={d.original} className="flex gap-2">
+                      <div
+                        className={`mt-1.5 h-1.5 w-1.5 shrink-0 rounded-sm ${c.dot}`}
+                      />
+                      <span className="text-xs leading-snug text-[#52525B]">
+                        &ldquo;{d.original}&rdquo; → &ldquo;{d.corrected}&rdquo;
+                        — {d.explanation}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>

@@ -20,11 +20,11 @@ export async function buildContext(
 
   const { data: rows } = await supabase
     .from("messages")
-    .select("sender, type, content, voice_url")
+    .select("sender, type, content")
     .eq("chat_id", chatId)
     .order("created_at", { ascending: false })
     .limit(limit)
-    .returns<Pick<MessageRow, "sender" | "type" | "content" | "voice_url">[]>();
+    .returns<Pick<MessageRow, "sender" | "type" | "content">[]>();
 
   if (!rows || rows.length === 0) return [];
 

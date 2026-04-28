@@ -32,6 +32,8 @@ export const TIER_LIMITS = {
   pro: 150,
 } as const;
 
+export const MAX_VOICE_SECONDS = 180;
+
 export const APP_LANGUAGES = [
   { code: "en", name: "English" },
   { code: "pt-BR", name: "Portugu\u00EAs (Brasil)" },

@@ -29,7 +29,7 @@ export function toMessageFromRow(row: MessageRow): Message {
     sender: row.sender,
     type: row.type,
     content: row.content ?? undefined,
-    voiceUrl: row.voice_url ?? undefined,
+    voiceLocalId: row.voice_local_id ?? undefined,
     voiceDurationSeconds: row.voice_duration_seconds ?? undefined,
     analysis: (row.analysis as AnalysisData) ?? undefined,
     createdAt: row.created_at,

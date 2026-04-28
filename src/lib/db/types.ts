@@ -42,7 +42,7 @@ export interface MessageRow {
   sender: "user" | "ai";
   type: "text" | "voice" | "analysis";
   content: string | null;
-  voice_url: string | null;
+  voice_local_id: string | null;
   voice_duration_seconds: number | null;
   analysis: unknown;
   created_at: string;

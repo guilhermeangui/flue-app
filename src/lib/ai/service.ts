@@ -119,6 +119,7 @@ export async function generateResponse(
 export async function generateVoiceAnalysis(
   transcription: string,
   language: LanguageCode,
+  detectedLanguage: string,
   tier: "free" | "pro",
 ): Promise<AIResult> {
   const systemPrompt = getAnalysisSystemPrompt(language);
@@ -137,7 +138,7 @@ export async function generateVoiceAnalysis(
     messages: [
       {
         role: "user",
-        content: `Transcription of the user's voice message: "${transcription}"`,
+        content: `Target language: ${language}\nDetected language: ${detectedLanguage}\nTranscription: "${transcription}"`,
       },
     ],
   });
@@ -179,28 +180,38 @@ export async function generateVoiceAnalysis(
   };
 }
 
-/** ISO 639-1 codes that Whisper accepts. */
-const WHISPER_LANG: Record<string, string> = {
-  pt: "pt",
-  en: "en",
-  es: "es",
-  fr: "fr",
+/**
+ * Whisper's verbose_json returns the detected language as a full English name
+ * (e.g. "portuguese"). Map back to ISO-639-1 codes we use elsewhere.
+ */
+const WHISPER_LANG_TO_ISO: Record<string, string> = {
+  portuguese: "pt",
+  english: "en",
+  spanish: "es",
+  french: "fr",
 };
 
 /**
  * Transcribe an audio file using OpenAI Whisper.
+ *
+ * Intentionally omits the `language` hint so Whisper auto-detects what was
+ * actually spoken. Passing a `language` hint causes Whisper to silently
+ * translate into that language (e.g. Portuguese speech → English transcript),
+ * which breaks our language-mismatch detection.
  */
 export async function transcribeAudio(
   audioFile: File,
-  language: LanguageCode,
-): Promise<string> {
+): Promise<{ text: string; detectedLanguage: string }> {
   const response = await getOpenAI().audio.transcriptions.create({
     model: "whisper-1",
     file: audioFile,
-    language: WHISPER_LANG[language] ?? language,
+    response_format: "verbose_json",
   });
 
-  return response.text.trim();
+  const rawLang = (response.language ?? "").toLowerCase();
+  const detectedLanguage = WHISPER_LANG_TO_ISO[rawLang] ?? rawLang;
+
+  return { text: response.text.trim(), detectedLanguage };
 }
 
 /**

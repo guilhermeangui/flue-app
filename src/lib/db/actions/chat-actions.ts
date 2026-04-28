@@ -136,7 +136,9 @@ export async function sendVoiceMessage(
   durationSeconds: number,
 ) {
   const file = formData.get("audio") as File | null;
+  const localAudioId = formData.get("localAudioId") as string | null;
   if (!file) throw new Error("No audio file");
+  if (!localAudioId) throw new Error("Missing localAudioId");
 
   const supabase = await createClient();
   const {
@@ -144,20 +146,8 @@ export async function sendVoiceMessage(
   } = await supabase.auth.getUser();
   if (!user) throw new Error("Not authenticated");
 
-  // Upload to Supabase Storage
-  const ext = file.type.includes("wav") ? "wav" : "webm";
-  const fileName = `${user.id}/${chatId}/${Date.now()}.${ext}`;
-  const { error: uploadError } = await supabase.storage
-    .from("voice-messages")
-    .upload(fileName, file, { contentType: file.type });
-
-  if (uploadError) throw new Error("Failed to upload voice message");
-
-  const {
-    data: { publicUrl },
-  } = supabase.storage.from("voice-messages").getPublicUrl(fileName);
-
-  // Save message
+  // Save message with a reference to the device-local blob.
+  // The audio itself lives in the client's IndexedDB — not persisted server-side.
   const { data: message, error } = await supabase
     .from("messages")
     .insert({
@@ -165,7 +155,7 @@ export async function sendVoiceMessage(
       user_id: user.id,
       sender: "user",
       type: "voice",
-      voice_url: publicUrl,
+      voice_local_id: localAudioId,
       voice_duration_seconds: durationSeconds,
     })
     .select("id, created_at")
@@ -190,6 +180,7 @@ export async function sendVoiceMessage(
     .single();
 
   if (chat) {
+    // `file` is used only for Whisper transcription; not persisted.
     await generateAndSaveVoiceResponse(
       user.id,
       chatId,
@@ -204,7 +195,7 @@ export async function sendVoiceMessage(
   return {
     id: message.id,
     createdAt: message.created_at,
-    voiceUrl: publicUrl,
+    localAudioId,
   };
 }
 
@@ -314,11 +305,17 @@ async function generateAndSaveVoiceResponse(
   const tier = (profile?.tier as "free" | "pro") ?? "free";
 
   try {
-    // 1. Transcribe the audio using Claude
-    const transcription = await transcribeAudio(audioFile, language);
+    // 1. Transcribe the audio (Whisper auto-detects the spoken language)
+    const { text: transcription, detectedLanguage } =
+      await transcribeAudio(audioFile);
 
-    // 2. Analyze the transcription
-    const result = await generateVoiceAnalysis(transcription, language, tier);
+    // 2. Analyze the transcription with awareness of what was actually spoken
+    const result = await generateVoiceAnalysis(
+      transcription,
+      language,
+      detectedLanguage,
+      tier,
+    );
 
     // Override transcription with the actual one
     result.analysis.transcription = transcription;
