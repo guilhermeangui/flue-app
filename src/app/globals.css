@@ -1,5 +1,14 @@
 @import "tailwindcss";
 
+@keyframes slide-up {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
 @keyframes fade-in {
   from {
     opacity: 0;
@@ -44,6 +53,7 @@
 @theme {
   --animate-fade-in: fade-in 0.3s ease-out;
   --animate-recording-pulse: recording-pulse 1.5s ease-in-out infinite;
+  --animate-slide-up: slide-up 0.25s ease-out;
 
   --font-heading: "Plus Jakarta Sans", sans-serif;
   --font-body: "Inter", sans-serif;

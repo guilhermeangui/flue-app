@@ -2,6 +2,9 @@
 
 import { ChevronDown, ChevronUp, Languages } from "lucide-react";
 import { useState } from "react";
+import type { TranslationKeys } from "@/i18n";
+import { t as tFn } from "@/i18n";
+import { useI18n } from "@/i18n/context";
 import type { AnalysisData } from "@/lib/types";
 
 const TYPE_COLORS: Record<string, { bg: string; text: string; dot: string }> = {
@@ -22,27 +25,28 @@ const TYPE_COLORS: Record<string, { bg: string; text: string; dot: string }> = {
   },
 };
 
-const LANG_NAME_PT: Record<string, string> = {
-  pt: "Português",
-  en: "Inglês",
-  es: "Espanhol",
-  fr: "Francês",
-  it: "Italiano",
-  de: "Alemão",
-  ja: "Japonês",
-  zh: "Chinês",
-  ko: "Coreano",
-  ru: "Russo",
+const LANG_NAME_KEYS: Record<string, TranslationKeys> = {
+  pt: "langNamePt",
+  en: "langNameEn",
+  es: "langNameEs",
+  fr: "langNameFr",
+  it: "langNameIt",
+  de: "langNameDe",
+  ja: "langNameJa",
+  zh: "langNameZh",
+  ko: "langNameKo",
+  ru: "langNameRu",
 };
-
-function languageLabelPt(code?: string): string {
-  if (!code) return "outro idioma";
-  return LANG_NAME_PT[code] ?? code.toUpperCase();
-}
 
 export function AnalysisCard({ analysis }: { analysis: AnalysisData }) {
   const [showDetails, setShowDetails] = useState(false);
   const isMismatch = analysis.languageMismatch === true;
+  const { t } = useI18n();
+
+  const langLabel = analysis.detectedLanguage
+    ? (t[LANG_NAME_KEYS[analysis.detectedLanguage]] ??
+      analysis.detectedLanguage.toUpperCase())
+    : "";
 
   return (
     <div className="flex items-end gap-2">
@@ -52,7 +56,7 @@ export function AnalysisCard({ analysis }: { analysis: AnalysisData }) {
       <div className="flex max-w-[270px] flex-col gap-2.5 rounded-[20px] rounded-tl-[4px] bg-white px-4 py-3.5 shadow-[0_2px_8px_#00000012]">
         {/* Label */}
         <span className="text-[11px] font-semibold text-primary">
-          AI Coach · Analysis
+          {t.aiCoachAnalysis}
         </span>
 
         {/* Transcription */}
@@ -64,10 +68,7 @@ export function AnalysisCard({ analysis }: { analysis: AnalysisData }) {
           <div className="flex items-start gap-2 rounded-xl bg-amber-50 px-3 py-2.5">
             <Languages className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
             <span className="text-xs leading-snug text-amber-700">
-              Você falou em{" "}
-              <strong>{languageLabelPt(analysis.detectedLanguage)}</strong>.
-              Este chat é para praticar outro idioma — tente novamente no idioma
-              do chat.
+              {tFn(t.langMismatchMsg, { lang: langLabel })}
             </span>
           </div>
         ) : (
@@ -76,7 +77,7 @@ export function AnalysisCard({ analysis }: { analysis: AnalysisData }) {
             {analysis.wordsToReview.length > 0 && (
               <>
                 <span className="text-[11px] font-semibold text-text-secondary">
-                  Words to review:
+                  {t.wordsToReview}
                 </span>
                 <div className="flex flex-wrap gap-1.5">
                   {analysis.wordsToReview.map((w) => {
@@ -100,10 +101,10 @@ export function AnalysisCard({ analysis }: { analysis: AnalysisData }) {
             {/* Summary */}
             <div className="flex items-center justify-between">
               <span className="rounded-full bg-teal-500/10 px-2.5 py-1 text-[11px] font-semibold text-teal-500">
-                {analysis.accuracyScore}% accuracy
+                {analysis.accuracyScore}% {t.accuracy}
               </span>
               <span className="text-xs text-text-muted">
-                {analysis.issuesCount} issues
+                {analysis.issuesCount} {t.issues}
               </span>
             </div>
 
@@ -115,7 +116,7 @@ export function AnalysisCard({ analysis }: { analysis: AnalysisData }) {
                 className="flex items-center gap-1"
               >
                 <span className="text-[13px] font-semibold text-primary">
-                  Details
+                  {t.details}
                 </span>
                 {showDetails ? (
                   <ChevronUp className="h-4 w-4 text-primary" />
@@ -136,8 +137,8 @@ export function AnalysisCard({ analysis }: { analysis: AnalysisData }) {
                         className={`mt-1.5 h-1.5 w-1.5 shrink-0 rounded-sm ${c.dot}`}
                       />
                       <span className="text-xs leading-snug text-[#52525B]">
-                        &ldquo;{d.original}&rdquo; → &ldquo;{d.corrected}&rdquo;
-                        — {d.explanation}
+                        &ldquo;{d.original}&rdquo; &rarr; &ldquo;{d.corrected}
+                        &rdquo; &mdash; {d.explanation}
                       </span>
                     </div>
                   );

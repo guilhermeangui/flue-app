@@ -2,6 +2,8 @@
 
 import { Mic, Paperclip, Send, Square } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { t as tFn } from "@/i18n";
+import { useI18n } from "@/i18n/context";
 import { MAX_VOICE_SECONDS } from "@/lib/constants";
 
 /**
@@ -95,12 +97,14 @@ interface ChatInputProps {
 
 export function ChatInput({
   disabled,
-  placeholder = "Type or hold mic...",
+  placeholder,
   onSend,
   onSendVoice,
   remaining,
   limit,
 }: ChatInputProps) {
+  const { t: dict } = useI18n();
+  const resolvedPlaceholder = placeholder ?? dict.typeOrHoldMic;
   const [text, setText] = useState("");
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
@@ -237,7 +241,10 @@ export function ChatInput({
                   nearLimit ? "text-error" : "text-error/80"
                 }`}
               >
-                Recording... {formatTime(recordingTime)} / {maxTimeLabel}
+                {tFn(dict.recording, {
+                  time: formatTime(recordingTime),
+                  max: maxTimeLabel,
+                })}
               </span>
             </div>
             <div className="h-1 overflow-hidden rounded-full bg-red-100">
@@ -258,7 +265,7 @@ export function ChatInput({
               onChange={(e) => setText(e.target.value)}
               onKeyDown={handleKeyDown}
               disabled={disabled}
-              placeholder={placeholder}
+              placeholder={resolvedPlaceholder}
               className="h-11 flex-1 bg-transparent text-sm text-text-primary outline-none placeholder:text-text-muted disabled:cursor-not-allowed"
             />
           </div>
@@ -290,7 +297,10 @@ export function ChatInput({
             usageLow ? "font-medium text-warning" : "text-text-muted"
           }`}
         >
-          {remaining}/{limit} messages remaining today
+          {tFn(dict.messagesRemaining, {
+            remaining: remaining ?? 0,
+            limit: limit ?? 0,
+          })}
         </p>
       )}
     </div>

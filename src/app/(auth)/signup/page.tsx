@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
+import { useI18n } from "@/i18n/context";
 
 export default function SignUpPage() {
   const [name, setName] = useState("");
@@ -18,11 +19,12 @@ export default function SignUpPage() {
   const router = useRouter();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const { t } = useI18n();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (password !== confirmPassword) {
-      setError("Passwords don't match");
+      setError(t.passwordsDontMatch);
       return;
     }
     if (!agreedTerms) return;
@@ -30,7 +32,7 @@ export default function SignUpPage() {
     setLoading(true);
     const success = await signup(name, email, password);
     if (!success) {
-      setError("Could not create account. Try a different email.");
+      setError(t.couldNotCreate);
     }
     setLoading(false);
   };
@@ -48,7 +50,7 @@ export default function SignUpPage() {
             <ChevronLeft className="h-5 w-5 text-text-primary" />
           </button>
           <span className="font-heading text-lg font-bold text-primary">
-            Fluê
+            Flu&ecirc;
           </span>
           <div className="h-9 w-9" />
         </div>
@@ -56,24 +58,22 @@ export default function SignUpPage() {
         {/* Headline */}
         <div className="flex flex-col gap-1.5">
           <h1 className="font-heading text-[26px] font-bold text-text-primary">
-            Create your account
+            {t.createAccount}
           </h1>
-          <p className="text-[15px] text-text-secondary">
-            Join Fluê and start practicing today
-          </p>
+          <p className="text-[15px] text-text-secondary">{t.joinFlue}</p>
         </div>
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="flex flex-col gap-3.5">
           <label className="flex flex-col gap-1.5">
             <span className="font-body text-sm font-medium text-text-primary">
-              Full Name
+              {t.fullName}
             </span>
             <div className="flex h-11 items-center gap-2 rounded-[22px] bg-surface px-4">
               <User className="h-[18px] w-[18px] text-text-muted" />
               <input
                 type="text"
-                placeholder="Your full name"
+                placeholder={t.fullNamePlaceholder}
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 className="flex-1 bg-transparent text-sm text-text-primary outline-none placeholder:text-text-muted"
@@ -83,7 +83,7 @@ export default function SignUpPage() {
 
           <label className="flex flex-col gap-1.5">
             <span className="font-body text-sm font-medium text-text-primary">
-              Email
+              {t.email}
             </span>
             <div className="flex h-11 items-center gap-2 rounded-[22px] bg-surface px-4">
               <Mail className="h-[18px] w-[18px] text-text-muted" />
@@ -99,12 +99,12 @@ export default function SignUpPage() {
 
           <label className="flex flex-col gap-1.5">
             <span className="font-body text-sm font-medium text-text-primary">
-              Password
+              {t.password}
             </span>
             <div className="flex h-11 items-center gap-2 rounded-[22px] bg-surface px-4">
               <input
                 type={showPassword ? "text" : "password"}
-                placeholder="Create a password"
+                placeholder={t.createPasswordPlaceholder}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="flex-1 bg-transparent text-sm text-text-primary outline-none placeholder:text-text-muted"
@@ -124,12 +124,12 @@ export default function SignUpPage() {
 
           <label className="flex flex-col gap-1.5">
             <span className="font-body text-sm font-medium text-text-primary">
-              Confirm Password
+              {t.confirmPassword}
             </span>
             <div className="flex h-11 items-center gap-2 rounded-[22px] bg-surface px-4">
               <input
                 type={showConfirm ? "text" : "password"}
-                placeholder="Confirm your password"
+                placeholder={t.confirmPasswordPlaceholder}
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 className="flex-1 bg-transparent text-sm text-text-primary outline-none placeholder:text-text-muted"
@@ -159,7 +159,7 @@ export default function SignUpPage() {
               {agreedTerms && <Check className="h-3.5 w-3.5 text-white" />}
             </button>
             <span className="text-[13px] leading-relaxed text-[#52525B]">
-              I agree to the Terms of Service and Privacy Policy
+              {t.agreeTerms}
             </span>
           </div>
 
@@ -170,17 +170,17 @@ export default function SignUpPage() {
             disabled={loading}
             className="flex h-14 items-center justify-center rounded-3xl bg-primary font-body text-base font-semibold text-white shadow-[0_6px_16px_#8B5CF650] disabled:opacity-60"
           >
-            {loading ? "Creating..." : "Create Account"}
+            {loading ? t.creating : t.createAccountBtn}
           </button>
         </form>
 
         {/* Sign in link */}
         <div className="flex items-center justify-center gap-1">
           <span className="text-sm text-text-secondary">
-            Already have an account?
+            {t.alreadyHaveAccount}
           </span>
           <Link href="/login" className="text-sm font-semibold text-primary">
-            Sign in
+            {t.signIn}
           </Link>
         </div>
       </div>

@@ -1,32 +1,23 @@
-"use client";
+import { redirect } from "next/navigation";
+import { AppShell } from "@/components/layout/app-shell";
+import type { AppLocale } from "@/i18n";
+import { DEFAULT_LOCALE } from "@/i18n";
+import { I18nProvider } from "@/i18n/context";
+import { getCurrentUser } from "@/lib/db/queries";
 
-import { usePathname } from "next/navigation";
-import { TabBar } from "@/components/layout/tab-bar";
-import { useAuth } from "@/hooks/use-auth";
+export default async function AppLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const user = await getCurrentUser();
+  if (!user) redirect("/login");
 
-const TAB_BAR_ROUTES = ["/chats", "/progress", "/profile"];
-
-export default function AppLayout({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, isLoading } = useAuth();
-  const pathname = usePathname();
-
-  if (isLoading) return null;
-  if (!isAuthenticated) return null;
-
-  const showTabBar = TAB_BAR_ROUTES.includes(pathname);
-
-  if (!showTabBar) {
-    return (
-      <div className="mx-auto flex h-dvh w-full max-w-3xl flex-col">
-        {children}
-      </div>
-    );
-  }
+  const locale = (user.appLanguage as AppLocale) || DEFAULT_LOCALE;
 
   return (
-    <div className="mx-auto flex h-dvh w-full max-w-3xl flex-col">
-      <main className="flex flex-1 flex-col overflow-y-auto">{children}</main>
-      <TabBar />
-    </div>
+    <I18nProvider locale={locale}>
+      <AppShell>{children}</AppShell>
+    </I18nProvider>
   );
 }

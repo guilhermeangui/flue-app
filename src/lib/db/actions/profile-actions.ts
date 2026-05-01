@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { cookies } from "next/headers";
 import { addLanguageSchema, updateProfileSchema } from "@/lib/db/schemas";
 import { createClient } from "@/lib/supabase/server";
 
@@ -104,4 +105,17 @@ export async function updateNotifications(enabled: boolean) {
 
 export async function updateAudioQuality(quality: string) {
   await updateProfile({ audioQuality: quality });
+}
+
+export async function updateAppLanguage(locale: string) {
+  // Persist locale in a cookie so auth pages (no user session) can read it.
+  const cookieStore = await cookies();
+  cookieStore.set("app-locale", locale, {
+    path: "/",
+    maxAge: 60 * 60 * 24 * 365,
+    sameSite: "lax",
+  });
+  await updateProfile({ appLanguage: locale });
+  // Revalidate all main routes so server components re-render with new locale.
+  revalidatePath("/", "layout");
 }

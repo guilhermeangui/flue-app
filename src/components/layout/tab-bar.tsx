@@ -3,15 +3,22 @@
 import { BarChart2, MessageCircle, User } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import type { TranslationKeys } from "@/i18n";
+import { useI18n } from "@/i18n/context";
 
-const tabs = [
-  { href: "/chats", icon: MessageCircle, label: "Chats" },
-  { href: "/progress", icon: BarChart2, label: "Progress" },
-  { href: "/profile", icon: User, label: "Profile" },
-] as const;
+const tabs: {
+  href: string;
+  icon: typeof MessageCircle;
+  labelKey: TranslationKeys;
+}[] = [
+  { href: "/chats", icon: MessageCircle, labelKey: "tabChats" },
+  { href: "/progress", icon: BarChart2, labelKey: "tabProgress" },
+  { href: "/profile", icon: User, labelKey: "tabProfile" },
+];
 
 export function TabBar() {
   const pathname = usePathname();
+  const { t } = useI18n();
 
   return (
     <div className="px-[21px] pb-[21px] pt-3">
@@ -29,7 +36,7 @@ export function TabBar() {
               }`}
             >
               <tab.icon className="h-5 w-5" />
-              <span className="font-body text-[11px]">{tab.label}</span>
+              <span className="font-body text-[11px]">{t[tab.labelKey]}</span>
             </Link>
           );
         })}

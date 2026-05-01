@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { Header } from "@/components/layout/header";
 import { LanguageList } from "@/components/profile/language-list";
 import { ProfileActions } from "@/components/profile/profile-actions";
+import { getDictionary } from "@/i18n";
 import { getCurrentUser, getUserLanguages } from "@/lib/db/queries";
 import type { LanguageCode } from "@/lib/types";
 
@@ -9,6 +10,7 @@ export default async function ProfilePage() {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
 
+  const dict = getDictionary(user.appLanguage);
   const languageRows = await getUserLanguages(user.id);
   const languages = languageRows.map((l) => ({
     id: l.id,
@@ -24,7 +26,7 @@ export default async function ProfilePage() {
 
   return (
     <div className="flex flex-1 flex-col">
-      <Header title="Profile" rightIcon="settings" />
+      <Header title={dict.tabProfile} />
 
       <div className="flex flex-1 flex-col gap-4 overflow-y-auto px-5 pb-4">
         {/* Hero card */}
@@ -50,7 +52,7 @@ export default async function ProfilePage() {
                 {user.dayStreak} 🔥
               </span>
               <span className="text-[11px] text-text-secondary">
-                Day Streak
+                {dict.dayStreak}
               </span>
             </div>
             <div className="h-9 w-px bg-border" />
@@ -58,14 +60,18 @@ export default async function ProfilePage() {
               <span className="font-heading text-xl font-bold text-text-primary">
                 {user.totalSessions}
               </span>
-              <span className="text-[11px] text-text-secondary">Sessions</span>
+              <span className="text-[11px] text-text-secondary">
+                {dict.sessions}
+              </span>
             </div>
             <div className="h-9 w-px bg-border" />
             <div className="flex flex-col items-center gap-0.5">
               <span className="font-heading text-xl font-bold text-primary">
                 {user.avgScore}%
               </span>
-              <span className="text-[11px] text-text-secondary">Avg Score</span>
+              <span className="text-[11px] text-text-secondary">
+                {dict.avgScore}
+              </span>
             </div>
           </div>
         </div>

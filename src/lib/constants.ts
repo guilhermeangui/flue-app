@@ -35,6 +35,12 @@ export const TIER_LIMITS = {
 export const MAX_VOICE_SECONDS = 180;
 
 export const APP_LANGUAGES = [
-  { code: "en", name: "English" },
-  { code: "pt-BR", name: "Portugu\u00EAs (Brasil)" },
+  { code: "en", name: "English", flag: "\uD83C\uDDFA\uD83C\uDDF8" },
+  {
+    code: "pt",
+    name: "Portugu\u00EAs (Brasil)",
+    flag: "\uD83C\uDDE7\uD83C\uDDF7",
+  },
+  { code: "es", name: "Espa\u00F1ol", flag: "\uD83C\uDDEA\uD83C\uDDF8" },
+  { code: "fr", name: "Fran\u00E7ais", flag: "\uD83C\uDDEB\uD83C\uDDF7" },
 ] as const;

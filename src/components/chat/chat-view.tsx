@@ -7,6 +7,8 @@ import { AnalysisCard } from "@/components/chat/analysis-card";
 import { ChatInput } from "@/components/chat/chat-input";
 import { MessageBubble } from "@/components/chat/message-bubble";
 import { VoiceMessage } from "@/components/chat/voice-message";
+import { t as tFn } from "@/i18n";
+import { useI18n } from "@/i18n/context";
 import type { UsageStatus } from "@/lib/ai/rate-limiter";
 import { saveAudio } from "@/lib/audio-storage";
 import { LANGUAGES } from "@/lib/constants";
@@ -33,6 +35,7 @@ export function ChatView({
   const [usage, setUsage] = useState(initialUsage);
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lang = LANGUAGES.find((l) => l.code === chat.language);
+  const { t } = useI18n();
 
   // Sync messages and usage when server data changes (after revalidation)
   useEffect(() => {
@@ -149,12 +152,12 @@ export function ChatView({
         </div>
         <div className="flex flex-1 flex-col gap-0.5">
           <span className="font-heading text-base font-bold text-text-primary">
-            AI Language Coach
+            {t.aiCoach}
           </span>
           <div className="flex items-center gap-1.5">
             <div className="h-2 w-2 rounded-full bg-success" />
             <span className="text-xs text-text-secondary">
-              Online · {lang?.flag} {lang?.name}
+              {t.online} · {lang?.flag} {lang?.name}
             </span>
           </div>
         </div>
@@ -176,11 +179,9 @@ export function ChatView({
           </div>
           <div className="flex max-w-[270px] flex-col gap-3 rounded-[20px] rounded-tl-[4px] bg-white px-4 py-3.5 shadow-[0_2px_8px_#00000012]">
             <span className="font-heading text-sm font-semibold text-text-primary">
-              Hi! I&apos;m your Flue coach.
+              {t.hiCoach}
             </span>
-            <p className="text-[13px] text-[#52525B]">
-              Choose a language to practice today and we&apos;ll get started!
-            </p>
+            <p className="text-[13px] text-[#52525B]">{t.chooseLang}</p>
             <div className="flex flex-wrap gap-2">
               {LANGUAGES.map((l) => (
                 <span
@@ -204,11 +205,9 @@ export function ChatView({
           </div>
           <div className="flex max-w-[220px] flex-col gap-1.5 rounded-[20px] rounded-tl-[4px] bg-white px-4 py-3 shadow-[0_2px_8px_#00000012]">
             <span className="text-sm font-semibold text-text-primary">
-              {lang?.name}! Great choice!
+              {lang?.name}! {t.greatChoice}
             </span>
-            <p className="text-[13px] text-[#52525B]">
-              Send me a voice or text message to start practicing.
-            </p>
+            <p className="text-[13px] text-[#52525B]">{t.sendToStart}</p>
           </div>
         </div>
 
@@ -259,13 +258,13 @@ export function ChatView({
         ) : (
           <div className="flex flex-col items-center gap-2 border-t border-surface px-4 py-4">
             <p className="text-sm text-text-secondary">
-              You&apos;ve used all {usage.limit} messages for today
+              {tFn(t.upgradePrompt, { limit: usage.limit })}
             </p>
             <button
               type="button"
               className="rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-white shadow-[0_4px_12px_#8B5CF640]"
             >
-              Upgrade to Pro — 150 msgs/day
+              {t.upgradeCta}
             </button>
           </div>
         )}

@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { ChatInput } from "@/components/chat/chat-input";
 import { LanguageSelector } from "@/components/chat/language-selector";
+import { t as tFn } from "@/i18n";
+import { useI18n } from "@/i18n/context";
 import { LANGUAGES } from "@/lib/constants";
 import { createChat } from "@/lib/db/actions/chat-actions";
 import type { LanguageCode } from "@/lib/types";
@@ -13,6 +15,7 @@ export default function NewChatPage() {
   const [selectedLang, setSelectedLang] = useState<LanguageCode | null>(null);
   const [isSending, setIsSending] = useState(false);
   const router = useRouter();
+  const { t } = useI18n();
   const langName = LANGUAGES.find((l) => l.code === selectedLang)?.name;
 
   const handleSend = async (text: string) => {
@@ -30,7 +33,7 @@ export default function NewChatPage() {
         <div className="transition-overlay absolute inset-0 z-50 flex flex-col items-center justify-center gap-4 bg-white">
           <div className="transition-spinner h-10 w-10 rounded-full border-[3px] border-surface border-t-primary" />
           <span className="text-sm font-medium text-text-secondary">
-            Starting your {langName} session...
+            {tFn(t.startingSession, { lang: langName ?? "" })}
           </span>
         </div>
       )}
@@ -41,7 +44,7 @@ export default function NewChatPage() {
           <ChevronLeft className="h-7 w-7 text-text-primary" />
         </button>
         <span className="font-heading text-[17px] font-bold text-text-primary">
-          New Chat
+          {t.newChat}
         </span>
         <button type="button" onClick={() => router.back()}>
           <X className="h-6 w-6 text-text-secondary" />
@@ -57,11 +60,9 @@ export default function NewChatPage() {
           </div>
           <div className="flex max-w-[270px] flex-col gap-3 rounded-[20px] rounded-tl-[4px] bg-white px-4 py-3.5 shadow-[0_2px_8px_#00000012]">
             <span className="font-heading text-sm font-semibold text-text-primary">
-              Hi! I&apos;m your Flue coach.
+              {t.hiCoach}
             </span>
-            <p className="text-[13px] text-[#52525B]">
-              Choose a language to practice today and we&apos;ll get started!
-            </p>
+            <p className="text-[13px] text-[#52525B]">{t.chooseLang}</p>
             <LanguageSelector
               selected={selectedLang}
               onSelect={setSelectedLang}
@@ -77,11 +78,9 @@ export default function NewChatPage() {
             </div>
             <div className="flex max-w-[220px] flex-col gap-1.5 rounded-[20px] rounded-tl-[4px] bg-white px-4 py-3 shadow-[0_2px_8px_#00000012]">
               <span className="text-sm font-semibold text-text-primary">
-                {langName}! Great choice!
+                {langName}! {t.greatChoice}
               </span>
-              <p className="text-[13px] text-[#52525B]">
-                Send me a voice or text message to start practicing.
-              </p>
+              <p className="text-[13px] text-[#52525B]">{t.sendToStart}</p>
             </div>
           </div>
         )}
@@ -91,11 +90,7 @@ export default function NewChatPage() {
       <div className="shrink-0 bg-white">
         <ChatInput
           disabled={!selectedLang || isSending}
-          placeholder={
-            selectedLang
-              ? "Type a message..."
-              : "Select a language above to start..."
-          }
+          placeholder={selectedLang ? t.typeMessage : t.selectLangFirst}
           onSend={handleSend}
         />
       </div>

@@ -2,6 +2,7 @@ import { MessageCircle, Plus } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Header } from "@/components/layout/header";
+import { getDictionary } from "@/i18n";
 import { LANGUAGES } from "@/lib/constants";
 import { getChats, getCurrentUser } from "@/lib/db/queries";
 import { formatDuration, formatRelativeDate } from "@/lib/format";
@@ -25,11 +26,12 @@ export default async function ChatsPage() {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
 
+  const dict = getDictionary(user.appLanguage);
   const chats = await getChats(user.id);
 
   return (
     <div className="flex flex-1 flex-col">
-      <Header title="Chats" rightIcon="search" />
+      <Header title={dict.tabChats} rightIcon="search" />
 
       {chats.length === 0 ? (
         <div className="flex flex-1 flex-col items-center justify-center gap-4 px-6">
@@ -37,10 +39,10 @@ export default async function ChatsPage() {
             <MessageCircle className="h-10 w-10 text-text-muted" />
           </div>
           <h2 className="font-heading text-lg font-bold text-text-primary">
-            No chats yet
+            {dict.noChatsYet}
           </h2>
           <p className="text-center text-sm text-text-secondary">
-            Start a new conversation to practice your language skills!
+            {dict.noChatsDesc}
           </p>
         </div>
       ) : (
@@ -69,7 +71,7 @@ export default async function ChatsPage() {
                       <span className="text-xs text-text-muted">
                         {lang?.flag} {lang?.name}
                       </span>
-                      <span className="text-xs text-text-muted">·</span>
+                      <span className="text-xs text-text-muted">&middot;</span>
                       <span className="text-xs text-text-muted">
                         {formatDuration(chat.durationSeconds)}
                       </span>
@@ -84,7 +86,7 @@ export default async function ChatsPage() {
         </div>
       )}
 
-      {/* FAB — sticky at bottom, above TabBar */}
+      {/* FAB */}
       <div className="flex justify-end px-5 pb-4 pt-2">
         <Link
           href="/chats/new"

@@ -1,5 +1,6 @@
 import { ChevronDown } from "lucide-react";
 import { redirect } from "next/navigation";
+import { getDictionary, t } from "@/i18n";
 import { getCurrentUser, getProgressData } from "@/lib/db/queries";
 
 const DAYS = [
@@ -16,44 +17,44 @@ export default async function ProgressPage() {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
 
+  const dict = getDictionary(user.appLanguage);
   const progress = await getProgressData(user.id);
 
   const hasData =
     progress.currentStreak > 0 || progress.accuracyTrend.length > 0;
 
-  // Chart data from accuracy trend or default empty
   const chartData =
     progress.accuracyTrend.length > 0
-      ? progress.accuracyTrend.map((t, i) => ({
+      ? progress.accuracyTrend.map((tr, i) => ({
           id: DAYS[i]?.id ?? `trend-${i}`,
-          label: t.label,
-          height: Math.max(10, t.value),
+          label: tr.label,
+          height: Math.max(10, tr.value),
         }))
       : DAYS.map((d) => ({ id: d.id, label: d.label, height: 10 }));
 
   const avgScore =
     progress.accuracyTrend.length > 0
       ? Math.round(
-          progress.accuracyTrend.reduce((s, t) => s + t.value, 0) /
+          progress.accuracyTrend.reduce((s, tr) => s + tr.value, 0) /
             progress.accuracyTrend.length,
         )
       : 0;
 
   const errorBars = [
     {
-      label: "Pronunciation",
+      label: dict.pronunciation,
       pct: progress.errorBreakdown.pronunciation,
       color: "text-red-500",
       gradient: "from-red-300 to-red-500",
     },
     {
-      label: "Grammar",
+      label: dict.grammar,
       pct: progress.errorBreakdown.grammar,
       color: "text-orange-500",
       gradient: "from-orange-200 to-orange-500",
     },
     {
-      label: "Spelling",
+      label: dict.spelling,
       pct: progress.errorBreakdown.spelling,
       color: "text-yellow-500",
       gradient: "from-yellow-200 to-yellow-500",
@@ -65,11 +66,11 @@ export default async function ProgressPage() {
       {/* Header with filter */}
       <div className="flex items-center justify-between px-5 pb-3 pt-5">
         <h1 className="font-heading text-[26px] font-extrabold text-text-primary">
-          Progress
+          {dict.progress}
         </h1>
         <div className="flex items-center gap-1 rounded-[20px] bg-surface px-3 py-1.5">
           <span className="text-xs font-semibold text-text-secondary">
-            This Month
+            {dict.thisMonth}
           </span>
           <ChevronDown className="h-3.5 w-3.5 text-text-secondary" />
         </div>
@@ -83,17 +84,17 @@ export default async function ProgressPage() {
               <span className="text-[22px]">🔥</span>
               <div className="flex flex-col gap-0.5">
                 <span className="font-heading text-base font-bold text-text-primary">
-                  {progress.currentStreak} Day Streak
+                  {t(dict.dayStreakLabel, { count: progress.currentStreak })}
                 </span>
                 <span className="text-xs text-text-secondary">
                   {progress.currentStreak > 0
-                    ? "Keep it up!"
-                    : "Start practicing!"}
+                    ? dict.keepItUp
+                    : dict.startPracticing}
                 </span>
               </div>
             </div>
             <span className="rounded-xl bg-amber-100 px-2.5 py-1 text-[11px] font-semibold text-amber-700">
-              Best: {progress.bestStreak}
+              {t(dict.best, { count: progress.bestStreak })}
             </span>
           </div>
 
@@ -129,15 +130,15 @@ export default async function ProgressPage() {
           <div className="flex items-center justify-between">
             <div className="flex flex-col gap-0.5">
               <span className="font-heading text-base font-bold text-text-primary">
-                Accuracy Trend
+                {dict.accuracyTrend}
               </span>
               <span className="text-xs text-text-secondary">
-                {hasData ? "Last sessions" : "No data yet"}
+                {hasData ? dict.lastSessions : dict.noDataYet}
               </span>
             </div>
             {avgScore > 0 && (
               <span className="rounded-xl bg-primary/10 px-2.5 py-1.5 text-xs font-semibold text-primary-dark">
-                Avg {avgScore}%
+                {t(dict.avg, { score: avgScore })}
               </span>
             )}
           </div>
@@ -171,7 +172,7 @@ export default async function ProgressPage() {
         {/* Error Breakdown */}
         <div className="flex flex-col gap-4 rounded-[20px] border border-border bg-white p-5 shadow-[0_2px_10px_#00000010]">
           <span className="font-heading text-base font-bold text-text-primary">
-            Error Breakdown
+            {dict.errorBreakdown}
           </span>
 
           {errorBars.map((bar) => (

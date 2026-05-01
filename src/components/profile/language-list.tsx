@@ -2,6 +2,7 @@
 
 import { Plus } from "lucide-react";
 import { useState } from "react";
+import { useI18n } from "@/i18n/context";
 import { LANGUAGES } from "@/lib/constants";
 import {
   addLanguage,
@@ -23,6 +24,7 @@ interface LanguageListProps {
 
 export function LanguageList({ languages, nativeLanguage }: LanguageListProps) {
   const [showPicker, setShowPicker] = useState(false);
+  const { t } = useI18n();
 
   const availableLanguages = LANGUAGES.filter(
     (l) => !languages.some((ul) => ul.language === l.code),
@@ -40,7 +42,7 @@ export function LanguageList({ languages, nativeLanguage }: LanguageListProps) {
   return (
     <div className="flex flex-col gap-3">
       <span className="text-[11px] font-bold tracking-wider text-text-muted">
-        MY LANGUAGES
+        {t.myLanguages}
       </span>
 
       {languages.map((lang) => {
@@ -65,13 +67,13 @@ export function LanguageList({ languages, nativeLanguage }: LanguageListProps) {
                 {config?.name}
               </span>
               <span className="text-xs text-text-secondary">
-                {lang.sessionsCount} sessions
-                {isNative ? " · Native target" : ""}
+                {lang.sessionsCount} {t.sessions.toLowerCase()}
+                {isNative ? ` \u00B7 ${t.nativeTarget}` : ""}
               </span>
             </div>
             {isActive && (
               <span className="rounded-xl bg-primary/10 px-2.5 py-1 text-[11px] font-semibold text-primary-dark">
-                Active
+                {t.active}
               </span>
             )}
           </button>
@@ -98,7 +100,7 @@ export function LanguageList({ languages, nativeLanguage }: LanguageListProps) {
             onClick={() => setShowPicker(false)}
             className="mt-1 text-sm text-text-muted"
           >
-            Cancel
+            {t.cancel}
           </button>
         </div>
       ) : (
@@ -110,7 +112,7 @@ export function LanguageList({ languages, nativeLanguage }: LanguageListProps) {
           >
             <Plus className="h-[18px] w-[18px] text-primary" />
             <span className="text-sm font-semibold text-primary">
-              Add Language
+              {t.addLanguage}
             </span>
           </button>
         )

@@ -4,6 +4,7 @@ import { Apple, Eye, EyeOff, Mail } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
+import { useI18n } from "@/i18n/context";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -12,6 +13,7 @@ export default function LoginPage() {
   const { login, loginWithGoogle, loginWithApple } = useAuth();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const { t } = useI18n();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,7 +21,7 @@ export default function LoginPage() {
     setLoading(true);
     const success = await login(email, password);
     if (!success) {
-      setError("Invalid email or password");
+      setError(t.invalidCredentials);
     }
     setLoading(false);
   };
@@ -35,28 +37,24 @@ export default function LoginPage() {
             </span>
           </div>
           <h1 className="font-heading text-[34px] font-extrabold text-text-primary">
-            Fluê
+            Flu&ecirc;
           </h1>
-          <p className="text-[15px] text-text-secondary">
-            Your AI Language Coach
-          </p>
+          <p className="text-[15px] text-text-secondary">{t.appTagline}</p>
         </div>
 
         {/* Welcome */}
         <div className="flex flex-col gap-1.5">
           <h2 className="font-heading text-[28px] font-bold text-text-primary">
-            Welcome back
+            {t.welcomeBack}
           </h2>
-          <p className="text-[15px] text-text-secondary">
-            Sign in to continue your journey
-          </p>
+          <p className="text-[15px] text-text-secondary">{t.signInContinue}</p>
         </div>
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <label className="flex flex-col gap-1.5">
             <span className="font-body text-sm font-medium text-text-primary">
-              Email
+              {t.email}
             </span>
             <div className="flex h-11 items-center gap-2 rounded-[22px] bg-surface px-4">
               <Mail className="h-[18px] w-[18px] text-text-muted" />
@@ -72,7 +70,7 @@ export default function LoginPage() {
 
           <label className="flex flex-col gap-1.5">
             <span className="font-body text-sm font-medium text-text-primary">
-              Password
+              {t.password}
             </span>
             <div className="flex h-11 items-center gap-2 rounded-[22px] bg-surface px-4">
               <input
@@ -100,7 +98,7 @@ export default function LoginPage() {
               href="/forgot-password"
               className="text-sm font-medium text-primary"
             >
-              Forgot password?
+              {t.forgotPassword}
             </Link>
           </div>
 
@@ -111,14 +109,14 @@ export default function LoginPage() {
             disabled={loading}
             className="flex h-14 items-center justify-center rounded-3xl bg-primary font-body text-base font-semibold text-white shadow-[0_6px_16px_#8B5CF650] disabled:opacity-60"
           >
-            {loading ? "Signing in..." : "Sign In"}
+            {loading ? t.signingIn : t.signIn}
           </button>
         </form>
 
         {/* Divider */}
         <div className="flex items-center gap-3">
           <div className="h-px flex-1 bg-border" />
-          <span className="text-[13px] text-text-muted">or</span>
+          <span className="text-[13px] text-text-muted">{t.or}</span>
           <div className="h-px flex-1 bg-border" />
         </div>
 
@@ -131,7 +129,7 @@ export default function LoginPage() {
           <span className="font-heading text-lg font-extrabold text-[#4285F4]">
             G
           </span>
-          Continue with Google
+          {t.continueGoogle}
         </button>
 
         <button
@@ -140,16 +138,14 @@ export default function LoginPage() {
           className="flex h-[52px] items-center justify-center gap-2.5 rounded-3xl bg-text-primary text-[15px] font-medium text-white"
         >
           <Apple className="h-5 w-5" />
-          Continue with Apple
+          {t.continueApple}
         </button>
 
         {/* Sign up link */}
         <div className="flex items-center justify-center gap-1">
-          <span className="text-sm text-text-secondary">
-            Don&apos;t have an account?
-          </span>
+          <span className="text-sm text-text-secondary">{t.noAccount}</span>
           <Link href="/signup" className="text-sm font-semibold text-primary">
-            Sign up
+            {t.signUp}
           </Link>
         </div>
       </div>

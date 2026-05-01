@@ -2,6 +2,7 @@
 
 import { Mic, Pause, Play } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useI18n } from "@/i18n/context";
 import { loadAudio } from "@/lib/audio-storage";
 import { computeWaveform } from "@/lib/waveform";
 
@@ -220,6 +221,7 @@ export function VoiceMessage({
     [audioAvailable, ensureAudio, isPlaying, applySeekFromClientX],
   );
 
+  const { t } = useI18n();
   const displayTime = isPlaying || isScrubbing ? currentTime : durationSeconds;
   const canPlay = audioAvailable === true && !!audioUrl;
 
@@ -295,7 +297,7 @@ export function VoiceMessage({
             </button>
           ) : audioAvailable === false ? (
             <span className="text-[10px] font-medium text-white/60">
-              áudio indisponível neste dispositivo
+              {t.audioUnavailable}
             </span>
           ) : null}
         </div>

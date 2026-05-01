@@ -4,11 +4,13 @@ import { ChevronLeft, Mail } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useI18n } from "@/i18n/context";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
   const router = useRouter();
+  const { t } = useI18n();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,7 +30,7 @@ export default function ForgotPasswordPage() {
             <ChevronLeft className="h-5 w-5 text-text-primary" />
           </button>
           <span className="font-heading text-lg font-bold text-primary">
-            Fluê
+            Flu&ecirc;
           </span>
           <div className="h-9 w-9" />
         </div>
@@ -36,10 +38,10 @@ export default function ForgotPasswordPage() {
         {/* Headline */}
         <div className="flex flex-col gap-1.5">
           <h1 className="font-heading text-[26px] font-bold text-text-primary">
-            Forgot password?
+            {t.forgotPasswordTitle}
           </h1>
           <p className="text-[15px] text-text-secondary">
-            Enter your email and we&apos;ll send you a reset link
+            {t.forgotPasswordDesc}
           </p>
         </div>
 
@@ -49,23 +51,21 @@ export default function ForgotPasswordPage() {
               <Mail className="h-7 w-7 text-success" />
             </div>
             <h2 className="font-heading text-lg font-bold text-text-primary">
-              Email sent!
+              {t.emailSent}
             </h2>
-            <p className="text-sm text-text-secondary">
-              Check your inbox for a password reset link.
-            </p>
+            <p className="text-sm text-text-secondary">{t.checkInbox}</p>
             <Link
               href="/login"
               className="mt-2 text-sm font-semibold text-primary"
             >
-              Back to Sign In
+              {t.backToSignIn}
             </Link>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <label className="flex flex-col gap-1.5">
               <span className="font-body text-sm font-medium text-text-primary">
-                Email
+                {t.email}
               </span>
               <div className="flex h-11 items-center gap-2 rounded-[22px] bg-surface px-4">
                 <Mail className="h-[18px] w-[18px] text-text-muted" />
@@ -83,7 +83,7 @@ export default function ForgotPasswordPage() {
               type="submit"
               className="flex h-14 items-center justify-center rounded-3xl bg-primary font-body text-base font-semibold text-white shadow-[0_6px_16px_#8B5CF650]"
             >
-              Send Reset Link
+              {t.sendResetLink}
             </button>
           </form>
         )}
@@ -91,10 +91,10 @@ export default function ForgotPasswordPage() {
         {!sent && (
           <div className="flex items-center justify-center gap-1">
             <span className="text-sm text-text-secondary">
-              Remember your password?
+              {t.rememberPassword}
             </span>
             <Link href="/login" className="text-sm font-semibold text-primary">
-              Sign in
+              {t.signIn}
             </Link>
           </div>
         )}
